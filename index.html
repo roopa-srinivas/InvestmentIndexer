@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Investment Indexer - Roopa Srinivas</title>
+<meta name="description" content="125 US stock market indexes ranked by growth, risk and drawdown over 1 to 50 years, using the Fama-French data library. Built with Python and pandas."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="site/style.css"/>
+</head>
+<body>
+<nav class="top">
+  <div class="nav-left">
+    <a class="nav-back" href="https://roopa-srinivas.github.io/#projects">← <span class="long">All </span>projects</a>
+    <span class="nav-logo">Investment Indexer</span>
+  </div>
+  <a class="nav-code" href="https://github.com/roopa-srinivas/InvestmentIndexer" target="_blank" rel="noopener">Code →</a>
+</nav>
+
+<header class="hero">
+  <p class="eyebrow">Financial analysis · Python + pandas · Rebuilt in 2026</p>
+  <h1>Which corners of the stock market <em>actually</em> grew the most?</h1>
+  <p class="lede">125 US stock market indexes (49 industries, plus portfolios sorted by size, value, momentum, profitability and investment) ranked by growth, risk and worst losses over windows from 1 to 50 years. Data through <span id="data-end"></span>.</p>
+</header>
+
+<main>
+  <section class="filters" aria-label="Filters">
+    <div class="filter">
+      <span class="filter-label" id="window-label">Window</span>
+      <div class="seg" id="window" role="radiogroup" aria-labelledby="window-label"></div>
+    </div>
+    <div class="filter">
+      <label class="filter-label" for="by">Rank by</label>
+      <select id="by">
+        <option value="cagr">Growth per year (CAGR)</option>
+        <option value="sharpe">Return per unit of risk (Sharpe)</option>
+        <option value="max_drawdown">Smallest worst drop</option>
+        <option value="volatility">Least volatile</option>
+      </select>
+    </div>
+    <div class="filter">
+      <label class="filter-label" for="group">Show</label>
+      <select id="group"></select>
+    </div>
+  </section>
+
+  <section class="tiles" id="tiles" aria-live="polite"></section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 id="board-title"></h2>
+        <p class="sub" id="board-sub"></p>
+      </div>
+    </div>
+    <div class="boards">
+      <div><h3>Top 10</h3><ol class="board" id="top"></ol></div>
+      <div><h3>Bottom 10</h3><ol class="board" id="bottom" ></ol></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>What $1 grew to</h2>
+        <p class="sub" id="growth-sub"></p>
+      </div>
+      <div class="key" id="growth-key"></div>
+    </div>
+    <div class="chart" id="growth-chart"></div>
+    <p class="hint">Click up to four rows in the table below to compare them with the total market. The scale is logarithmic, so equal steps up mean equal percentage growth.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Every index</h2>
+        <p class="sub">Click a column to sort, or a row to chart it.</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="table">
+        <thead><tr>
+          <th scope="col" class="num"><button data-sort="rank">#</button></th>
+          <th scope="col"><button data-sort="name">Index</button></th>
+          <th scope="col"><button data-sort="group">Group</button></th>
+          <th scope="col" class="num"><button data-sort="cagr">CAGR</button></th>
+          <th scope="col" class="num"><button data-sort="volatility">Volatility</button></th>
+          <th scope="col" class="num"><button data-sort="sharpe">Sharpe</button></th>
+          <th scope="col" class="num"><button data-sort="max_drawdown">Worst drop</button></th>
+          <th scope="col" class="num"><button data-sort="growth">$1 became</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card insight">
+    <h2>Do the winners keep winning?</h2>
+    <p class="sub">Each index ranked by growth in one period, then again in the next period of the same length.</p>
+    <div class="persist" id="persist"></div>
+    <p>Hardly. Across 125 indexes, how well something did in one 15-year stretch says almost nothing about the next one. That's why chasing last decade's best sector is risky, and why a broad market index is a hard benchmark to beat.</p>
+  </section>
+
+  <section class="about">
+    <div>
+      <h2>How it works</h2>
+      <ol>
+        <li><b>Data:</b> Python downloads monthly, value-weighted returns from the <a href="https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html">Kenneth R. French Data Library</a>, the standard source for academic research on US stocks, and parses the first table of each file.</li>
+        <li><b>Analysis:</b> pandas computes each index's compound annual growth, annualized volatility, Sharpe ratio against the risk-free rate, worst peak-to-trough drop, and growth of $1, for any window. Indexes missing any month in a window are left out of it.</li>
+        <li><b>Ranking:</b> indexes are sorted by the chosen measure. Ranks from back-to-back windows are compared with a Spearman correlation.</li>
+        <li><b>This page:</b> <code>python -m indexer export</code> writes the results to one JSON file. The page only displays it; all the math is in the tested Python package.</li>
+      </ol>
+    </div>
+    <div>
+      <h2>From the command line</h2>
+<pre><code>$ python -m indexer rank --years 15 --top 3 --group Industry
+49 indexes ranked by cagr, 2011-09 to 2026-08
+
+   #  Index                              Group             CAGR     Vol Sharpe  Max DD     $1 →
+   1  Electronic Equipment               Industry         26.6%   22.1%   1.12  -29.9%    34.38
+   2  Defense                            Industry         19.5%   20.2%   0.91  -23.5%    14.51
+   3  Software                           Industry         18.0%   18.2%   0.92  -39.3%    12.04
+   …
+  47  Apparel                            Industry          5.4%   22.1%   0.28  -52.6%     2.20
+  48  Recreation                         Industry          3.8%   25.2%   0.21  -73.2%     1.75
+  49  Coal                               Industry         -6.7%   46.0%   0.05  -97.2%     0.35
+
+Did the winners repeat? Comparing 1996-09 to 2011-08 with 2011-09 to 2026-08: rank correlation 0.12, 3 of the earlier top 10 stayed in the top 10.</code></pre>
+      <p class="small">Options: <code>--years</code>, <code>--by cagr|sharpe|max_drawdown|volatility|growth</code>, <code>--group Industry</code>, <code>--end 2008-12</code>. 15 pytest tests cover parsing, every measure, ranking, and the exported results.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Data: Kenneth R. French Data Library (Tuck School of Business, Dartmouth), built from CRSP. Returns include dividends and are before fees and taxes; indexes are research portfolios, not funds you can buy directly. For learning, not investment advice.</p>
+    <p>Rebuilt in 2026 by <a href="https://roopa-srinivas.github.io/">Roopa Srinivas</a>.</p>
+  </footer>
+</main>
+
+<div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="site/report.js"></script>
+</body>
+</html>
