@@ -57,7 +57,7 @@ function renderBoards(rows) {
   const w = data.windows[state.years];
   const m = MEASURES[state.by];
   $('board-title').textContent = `Ranked by ${m.label}, ${state.years === '1' ? 'last 12 months' : `last ${state.years} years`}`;
-  $('board-sub').textContent = `${w.start} to ${data.end} · ${rows.length} indexes${state.group === 'all' ? '' : ` in ${state.group} (plus the market)`} · the black tick is the US Total Market`;
+  $('board-sub').textContent = `${w.start} to ${data.end} · ${rows.length} indexes${state.group === 'all' ? '' : ` in ${state.group} (plus the market)`} · the tick mark is the US Total Market`;
   const values = rows.map((r) => r[state.by]);
   const lo = Math.min(0, ...values), hi = Math.max(0, ...values);
   const x = (v) => ((v - lo) / (hi - lo || 1)) * 100;
